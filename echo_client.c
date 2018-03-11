@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 	if(connect(sock, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) == -1){
 		error_handling("connect() error!");
 	} else {
-		puts("Connected........");
+		printf("Connected........ clnt_sock:%d\n", sock);
 	}
 
 	while(1){
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 		
 		str_len = read(sock, message, BUF_SIZE-1);
 		message[str_len] = 0;
-		printf("Message from server:%s", message);
+		printf("Message from server:%s\n", message);
 	}
 	close(sock);
 	return 0;
