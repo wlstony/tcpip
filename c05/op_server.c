@@ -6,11 +6,15 @@
 #include <string.h> 
 
 #define BUF_SIZE 1024
+#define OPSZ 4
 void error_handling(char *message);
+int caculate(int opnum, int opnds[], char operator);
 
 int main(int argc, char *args[])
 {
 	int serv_sock, clnt_sock, i=0, str_len=0;
+	char opinfo[BUF_SIZE];
+	int result, opnd_cnt, recv_len=0;
 	struct sockaddr_in serv_addr, clnt_addr;
 	socklen_t clnt_addr_size;
 	
@@ -43,13 +47,40 @@ int main(int argc, char *args[])
 		else
 			printf("connected client %d\n", i+1);
 
-		while((str_len = read(clnt_sock, message, BUF_SIZE)) != 0)
-			write(clnt_sock, message, str_len);
+		opnd_cnt = 0;
+		read(clnt_sock, &opnd_cnt, 1);
+		while((opnd_cnt * OPSZ + 1) > recv_len){
+			str_len = read(clnt_sock, &opinfo[recv_len], BUF_SIZE);
+			recv_len += str_len;
+		}
+		
+		result = caculate(opnd_cnt, (int *)opinfo , opinfo[recv_len-1]);
+		printf("result: %d\n", result);
+
 		close(clnt_sock);
 	}
 	close(serv_sock);
 }
 
+int caculate(int opnum, int opnds[], char operator) {
+    int ret = opnds[0], i;
+	for(i=0; i<opnum; i++) {
+		printf("opnum %d : %d\n", i, opnds[i]);
+	}
+	printf("operator: %c\n", operator);
+    switch(operator){
+        case '+':
+			for(i=1; i<opnum; i++) ret += opnds[i];
+            break;
+        case '-':
+			for(i=1; i<opnum; i++) ret -= opnds[i];
+            break;
+        case '*':
+			for(i=1; i<opnum; i++) ret *= opnds[i];
+            break;
+    }
+    return ret;
+}
 void error_handling(char * message)
 {
 	fputs(message, stderr);
